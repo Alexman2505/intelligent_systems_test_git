@@ -1,69 +1,101 @@
 import socket
-import time
 import json
 
-# Сокет — это программный объект (интерфейс), представляющий
-# конечную точку сетевого соединения, определяемую уникальной комбинацией
-#  IP-адреса, номера порта и транспортного протокола,
-# предоставляющий интерфейс для отправки и получения данных через сеть.
+
+class SocketServer:
+    ENCODING = 'utf-8'
+
+    def __init__(self, host='0.0.0.0', port=8686):
+        self.host = host
+        self.port = port
+        self.server_socket = None
+        self.client_socket = None
+        self.client_address = None
+
+    def start(self):
+        """Запускает сервер"""
+        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server_socket.bind((self.host, self.port))
+        self.server_socket.listen(10)
+        print(f'Server listening on {self.host}:{self.port}...')
+
+    def accept_client(self):
+        """Принимает подключение клиента"""
+        self.client_socket, self.client_address = self.server_socket.accept()
+        print(f'Client connected from {self.client_address}')
+        return self.client_socket, self.client_address
+
+    def receive_text(self, buffer_size=1024):
+        """Получает текст от клиента"""
+        if not self.client_socket:
+            raise RuntimeError("No client connected")
+
+        data = self.client_socket.recv(buffer_size)
+        if not data:
+            return None
+        return data.decode(self.ENCODING)
+
+    def receive_json(self):
+        """Получает JSON от клиента"""
+        text = self.receive_text()
+        if text:
+            return json.loads(text)
+        return None
+
+    def send_text(self, text):
+        """Отправляет текст клиенту"""
+        if not self.client_socket:
+            raise RuntimeError("No client connected")
+
+        data = text.encode(self.ENCODING)
+        self.client_socket.send(data)
+
+    def send_json(self, data):
+        """Отправляет JSON клиенту"""
+        json_str = json.dumps(data, ensure_ascii=False)
+        self.send_text(json_str)
+
+    def close_client(self):
+        """Закрывает соединение с клиентом"""
+        if self.client_socket:
+            self.client_socket.close()
+            self.client_socket = None
+            print(f'Connection with {self.client_address} closed')
+
+    def close_server(self):
+        """Завершает работу сервера"""
+        self.close_client()
+        if self.server_socket:
+            self.server_socket.close()
+            print('Server stopped')
 
 
-# Приложение
-# Библиотека сокетов (socket API)
-# Транспортный уровень (TCP/UDP) TCP сегменты
-# Сетевой уровень (IP) IP пакеты
-# Канальный уровень (Ethernet/WiFi) Ethernet фреймы
-# Физический уровень (провода/радио) Электрические/оптические сигналы
+# Использование сервера
+if __name__ == "__main__":
+    server = SocketServer('0.0.0.0', 8686)
+    server.start()
 
+    try:
+        while True:
+            # Ждем клиента
+            server.accept_client()
 
-def handle_client(client_socket, client_address):
-    print(f"\nClient connected: {client_address}")
+            # Общаемся с клиентом
+            while True:
+                # Получаем сообщение
+                message = server.receive_text()
+                if not message:  # Клиент отключился
+                    break
 
-    while True:
-        try:
-            # Ждем данные от клиента
-            data = client_socket.recv(1024)
-            if not data:  # Клиент закрыл соединение
-                print(f"Client {client_address} disconnected")
-                break
+                print(f'From client: {message}')
 
-            # Пытаемся понять, что пришло
-            try:
-                text = data.decode('utf-8')
+                # Отправляем ответ
+                server.send_text(message)
 
-                # Пробуем распарсить как JSON
-                try:
-                    json_data = json.loads(text)
-                    print(f"JSON from {client_address}: {json_data}")
-                    response = {"status": "processed", "data": json_data}
-                    client_socket.send(json.dumps(response).encode('utf-8'))
-                except json.JSONDecodeError:
-                    # Это просто текст
-                    print(f"Text from {client_address}: {text}")
-                    client_socket.send(f"Echo: {text}".encode('utf-8'))
+            # Закрываем соединение с этим клиентом
+            server.close_client()
 
-            except UnicodeDecodeError:
-                # Бинарные данные
-                print(f"Binary data from {client_address}, size: {len(data)}")
-                client_socket.send(b"Binary received")
-
-        except ConnectionResetError:
-            print(f"Client {client_address} disconnected abruptly")
-            break
-        except Exception as e:
-            print(f"Error with {client_address}: {e}")
-            break
-
-    client_socket.close()
-    print(f"Connection closed")
-
-
-# Основной сервер
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind(('0.0.0.0', 8686))
-server.listen(10)
-print('Server listening on port 8686...')
-
-while True:
-    client_socket, client_address = server.accept()
-    handle_client(client_socket, client_address)
+    except KeyboardInterrupt:
+        print('\nServer stopped by user')
+    finally:
+        server.close_server()

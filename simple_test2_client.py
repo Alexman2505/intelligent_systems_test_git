@@ -1,16 +1,3 @@
-# import socket
-
-
-# client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# client_socket.connect(('localhost', 8686))
-# client_socket.send(
-#     'Hello from client'.encode('utf-8')
-# )  # или b'Hello' Это 5 байт: [72, 101, 108, 108, 111]
-# data = client_socket.recv(1024)
-# print(f"Received: {data.decode('utf-8')}")
-# client_socket.close()
-# print("Connection closed")
-
 import socket
 import time
 import json
@@ -30,7 +17,6 @@ class SocketClient:
 
     def send_json(self, data):
         """Отправляет JSON"""
-
         json_str = json.dumps(data, ensure_ascii=False)
         self.send_text(json_str)
 
@@ -49,12 +35,20 @@ class SocketClient:
 
 
 # Использование
-client = SocketClient('localhost', 8686)
-client.send_text('Hello, server!')
-response = client.receive_text()
-print(response)
+if __name__ == "__main__":
+    client = SocketClient('localhost', 8686)
+    print('client starting')
 
-client.send_json({"cmd": "start", "msg": "starting"})
-response = client.receive_json()
-print(response)
-client.close()
+    try:
+        client.send_text('Hello from client!')
+        response = client.receive_text()
+        print(f'Response 1: {response}')
+
+        client.send_json({"cmd": "start", "msg": "starting"})
+        response = client.receive_json()
+        print(f'Response 2: {response}')
+
+    except Exception as e:
+        print(f'Error: {e}')
+    finally:
+        client.close()
