@@ -12,6 +12,8 @@
 # print("Connection closed")
 
 import socket
+import time
+import json
 
 
 class SocketClient:
@@ -28,7 +30,6 @@ class SocketClient:
 
     def send_json(self, data):
         """Отправляет JSON"""
-        import json
 
         json_str = json.dumps(data, ensure_ascii=False)
         self.send_text(json_str)
@@ -40,8 +41,6 @@ class SocketClient:
 
     def receive_json(self):
         """Получает JSON"""
-        import json
-
         text = self.receive_text()
         return json.loads(text)
 
@@ -51,11 +50,11 @@ class SocketClient:
 
 # Использование
 client = SocketClient('localhost', 8686)
-client.send_text('Привет, сервер!')  # Русский - работает
+client.send_text('Hello, server!')
 response = client.receive_text()
 print(response)
 
-client.send_json({"cmd": "start", "msg": "Начинаем"})  # Русский в JSON
+client.send_json({"cmd": "start", "msg": "starting"})
 response = client.receive_json()
 print(response)
 client.close()
