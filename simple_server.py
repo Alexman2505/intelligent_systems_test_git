@@ -22,8 +22,8 @@ class SocketServer:
     def accept_client(self):
         """Принимает подключение клиента"""
         self.client_socket, self.client_address = self.server_socket.accept()
-        print(f'Client connected from {self.client_address}')
-        return self.client_socket, self.client_address
+        print(f'\nClient connected from {self.client_address}')
+        # return self.client_socket, self.client_address
 
     def receive_text(self, buffer_size=1024):
         """Получает текст от клиента"""
