@@ -2,6 +2,15 @@
 
 intelligent_systems_test_git
 
+## запуск в папке с проектом
+
+`python a_run.py`
+
+результат выполнения в виде логов client_1.log, client_2.log, server.log
+исполняемые файлы a_run.py (запускает server.py, client.py )
+
+## Описание задачи:
+
 Задача 1.
 Использовать Python 3.10 и asyncio.
 
