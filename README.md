@@ -2,13 +2,13 @@
 
 intelligent_systems_test_git
 
-## запуск в папке с проектом
+## Запуск в папке с проектом
 
 `python a_run.py`
 
-результат выполнения в виде логов client_1.log, client_2.log, server.log
+Результат выполнения в виде логов client_1.log, client_2.log, server.log
 
-исполняемые файлы a_run.py (запускает server.py, client.py )
+Исполняемый файлы a_run.py (запускает server.py, client.py). Остальные файлы для истории (изучение теории сокетов)
 
 ## Описание задачи:
 
