@@ -7,6 +7,7 @@ intelligent_systems_test_git
 `python a_run.py`
 
 результат выполнения в виде логов client_1.log, client_2.log, server.log
+
 исполняемые файлы a_run.py (запускает server.py, client.py )
 
 ## Описание задачи:
